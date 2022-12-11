@@ -1,5 +1,5 @@
 {
-    "name": "Workday DemoWhat",
+    "name": "Workday Observer",
     "description": "Keep an eye on pages used!",
     "homepage_url": "https://sizingtool.us",
     "content_security_policy": {
@@ -16,7 +16,7 @@
             "128": "img/workday-dub.png",
             "256": "img/workday-dub.png"
         },
-        "default_title" : "Workday DemoWhat",
+        "default_title" : "Workday Observer",
         "default_popup" : "options.html"
     },
     
@@ -38,20 +38,19 @@
             "*://*/_/chrome/newtab*"
         ],
         "js": [
-            "js/wddw-cnt.js"
+            "js/observer-cnt.js"
         ],
         "run_at": "document_start"
     }],
 
     "background": {
-        "service_worker": "js/wddw-svc.js"
+        "service_worker": "js/observer-svc.js"
     },
 
     "web_accessible_resources": [ {
         "resources" : [
             "/img/*",
             "/js/*",
-            "/gen/*",
             "/css/*",
             "/lib/*",
             "/settings.json",
