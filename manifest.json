@@ -1,0 +1,67 @@
+{
+    "name": "Workday DemoWhat",
+    "description": "Keep an eye on pages used!",
+    "homepage_url": "https://sizingtool.us",
+    "content_security_policy": {
+        "script_src" : "self",
+        "object_src" : "self"
+    },
+
+    "version": "1.00",
+
+    "action" : {
+        "default_icon": {
+            "16": "img/workday-dub.png",
+            "48": "img/workday-dub.png",
+            "128": "img/workday-dub.png",
+            "256": "img/workday-dub.png"
+        },
+        "default_title" : "Workday DemoWhat",
+        "default_popup" : "options.html"
+    },
+    
+    "permissions": [
+        "storage"
+    ],
+
+    "host_permissions" : [
+        "*://*.wd99.myworkday.net/*",
+        "*://*.sizingtool.us/*"
+    ],
+
+    "content_scripts": [{
+        "matches": [
+            "*://*.wd99.myworkday.net/*",
+            "*://app.staging-peakon.com/*"
+        ],
+        "exclude_matches": [
+            "*://*/_/chrome/newtab*"
+        ],
+        "js": [
+            "js/wddw-cnt.js"
+        ],
+        "run_at": "document_start"
+    }],
+
+    "background": {
+        "service_worker": "js/wddw-svc.js"
+    },
+
+    "web_accessible_resources": [ {
+        "resources" : [
+            "/img/*",
+            "/js/*",
+            "/gen/*",
+            "/css/*",
+            "/lib/*",
+            "/settings.json",
+            "*.html"
+        ],
+        "matches": ["<all_urls>"],
+        "extension_ids": []
+    }],
+
+    "options_page": "options.html",
+
+    "manifest_version": 3
+}

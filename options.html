@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Workday DemoWhat</title>
+</head>
+
+<body>
+    <div style="background-color: #005cb9; width: 100%; text-align: center">
+        <img src="img/logo_wday_reversed-RGB.png" style="width: 80%" />
+    </div>
+    Clear Cache: <button id="clear_cache">Clear</button>
+    <hr>
+    <div style="padding-bottom: 15px;">
+        Demo Mode: <input id="wddw_mode" name="wddw_mode" type="checkbox" value="demoMode" checked="false">
+    </div>
+
+    <label>Workmate:</label>
+    <input id="wddw_workmate" name="wddw_workmate" type="text" placeholder="first.last" value="">
+
+    <label>Server:</label>
+    <input id="wddw_server" name="wddw_server" placeholder="xxxx.aws.amazon.com" type="text">
+
+    <div style="margin: 25px;" id="wddw_status"></div>
+    <button id="wddw_save">Save</button>
+    <p id="wddw_status"></p>
+    <script src="js/options.js"></script>
+</body>
+
+</html>
