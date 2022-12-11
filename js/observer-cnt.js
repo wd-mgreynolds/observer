@@ -1,27 +1,33 @@
-const regexp = /(?:#)(\w+)\b/g;
+// Start listening for messages from the background service
+// worker.  Any interaction with the remote repository is
+// handled, in an async manner, through the background services.
 
-// Start listening to the background service worker.  Any
-// interaction with the remote repository is handled, in
-// an async manner, through the background services.
-
-var wddw_patterns = undefined;
+var observer_patterns = undefined;
 
 chrome.runtime.onMessage.addListener(
     function (request, sender, sendResponse) {
         // listen for messages sent from background.js
         if (request.sender && request.sender === 'workday') {
+            // A patterns message is the reply from the get patterns
+            // request sent when the content was first injected.
+
             if (request.message && request.message === 'patterns') {
-                wddw_patterns = request.patterns;
+                observer_patterns = request.patterns;
             }
         }
     });
 
-// Ask for the patterns we use to identify the classes of pages.  These
-// will drive the content generated as events.  We start looking
-// for the identity of the page when the search patterns are
-// returned as a message.
+// Ask for the patterns we use to identify pages and elements on
+// pages.  These will drive the messages generated as events.  We
+// start looking for the identity of the page when the search
+// patterns are returned as a message to our listener.
 
 chrome.runtime.sendMessage({ "action": "patterns" });
+
+// Utility function to wait for an element we want to observer
+// that has not yet been rendered in the page.  The trick here
+// is to observer the entire document until our target element
+// exists - then stop observing.
 
 function waitForElm(selector) {
     return new Promise(resolve => {
@@ -45,9 +51,10 @@ function waitForElm(selector) {
 
 debugger;
 
-function gettokenValue(pattern, match) {
-    // Validate the pattern match for required values.
+// Utility function to locate a value from the page
+// to insert into an event message.
 
+function gettokenValue(pattern, match) {
     // Did we actually get a pattern?
     if (!pattern) {
         return "Invalid pattern in gettokenValue";
@@ -58,16 +65,18 @@ function gettokenValue(pattern, match) {
         return "Missing contents in gettokenValue";
     }
 
-    // Do we have a format specification to build our return?
+    // Do we have a format specification to build our return string?
     if (!pattern.contents.format) {
         return "Missing format specifier";
     }
 
     var format = pattern.contents.format;
-    var tokens = pattern.contents.tokens;
+    var tokens = pattern.contents.tokens; // List of token objects
 
     // If there are no subsitition tokens defined simply
-    // return the format defintion string.
+    // return the format defintion string.  There may be
+    // tags (#tag) values in the string, but we have no
+    // substitutions, so no reason to look.
 
     if (!tokens || typeof tokens !== "object") {
         return format;
@@ -83,15 +92,23 @@ function gettokenValue(pattern, match) {
         let item;
 
         if (token.type === "document") {
+            // The target value is NOT a child of the matched
+            // element, search the entire page.
             item = document.querySelector(token.content)
         } else if (token.type === "local") {
             if (token.content) {
+                // The target value is a child of the matched
+                // element, search only from this token's
+                // child elements.
+
                 item = match.querySelector(token.content);
             } else {
+                // Neither
                 item = match;
             }
         }
 
+        // Apply 
         let tokenValue = "Missing eval function";
 
         if (token.eval === "value") {
@@ -132,17 +149,34 @@ function generateEvent(pattern, tokenValue) {
     }
 }
 
+// Handle all changes we are observing.
 const observer = new MutationObserver(mutations => {
     mutations.forEach((mutation) => {
-        if (wddw_patterns !== undefined) {
-            if (mutation.type === "childList") {
-                for (let wddw_pattern in wddw_patterns) {
-                    let pattern = wddw_patterns[wddw_pattern];
+        // It is possible that page mutations happen BEFORE we
+        // get the patterns back from the server.  If we don't
+        // have our patterns, simply skip this set of mutations.
 
+        if (observer_patterns !== undefined) {
+            if (mutation.type === "childList") {
+                // We are only looking for changes to the DOM - changes
+                // to attributes are ignored.
+
+                for (let observer_pattern in observer_patterns) {
+                    // Loop over the patterns retrieved from the server and
+                    // see if any of the mutations match.
+
+                    let pattern = observer_patterns[observer_pattern];
+
+                    // Is the pattern present?
                     let match = mutation.target.querySelector(pattern.selector);
 
                     if (match) {
+                        // Generate the message we need to send with the event.
                         let token = gettokenValue(pattern, match);
+
+                        // Since a mutation may include our pattern multiple times,
+                        // i.e., multiple mutations that include us, only send an
+                        // event if the event message value changes.
 
                         if (pattern.lastValue !== token) {
                             pattern.lastValue = token;
@@ -156,6 +190,9 @@ const observer = new MutationObserver(mutations => {
         }
     });
 });
+
+// Start watching for mutations.  NOTE: we are watching the
+// entire DOM for changes.
 
 observer.observe(document, {
     childList: true,

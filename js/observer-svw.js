@@ -11,7 +11,7 @@ chrome.runtime.onInstalled.addListener(function (details) {
 
 chrome.runtime.onStartup.addListener(function (event) {
     var thisVersion = chrome.runtime.getManifest().version;
-    console.log("here");
+    console.log("running startup event");
 });
 
 // Listen for requests from the content script.
