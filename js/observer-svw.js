@@ -31,8 +31,8 @@ chrome.runtime.onMessage.addListener(
 // Lookup the available page identification patterns
 // and return them to the content script.
 function getPatterns(tab) {
-    chrome.storage.sync.get('wddw_server', function (item) {
-        var endpoint = 'https://' + (item.wddw_server || 'sizingtool.us') + '/patterns';
+    chrome.storage.sync.get('wdobserver_server', function (item) {
+        var endpoint = 'https://' + (item.wdobserver_server || 'sizingtool.us') + '/patterns';
 
         fetch(endpoint)
             .then((response) => response.json())
@@ -47,10 +47,10 @@ function getPatterns(tab) {
 }
 
 function sendEvent(eventData, options) {
-    chrome.storage.sync.get(['wddw_server', 'wddw_workmate'], function (items) {
-        eventData.workmate = items.wddw_workmate || 'first.last';;
+    chrome.storage.sync.get(['wdobserver_server', 'wdobserver_workmate'], function (items) {
+        eventData.workmate = items.wdobserver_workmate || 'first.last';;
 
-        var endpoint = 'https://' + (items.wddw_server || 'sizingtool.us') + '/event';
+        var endpoint = 'https://' + (items.wdobserver_server || 'sizingtool.us') + '/event';
 
         fetch(endpoint, {
             method: 'POST',
